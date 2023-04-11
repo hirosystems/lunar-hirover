@@ -115,7 +115,7 @@ const DEFAULT_ENTROPY: [u8; 32] = [
 
 pub fn generate_random_mnemonic() -> Mnemonic {
     let mut entropy: [u8; 32] = [0; 32];
-    let mut entropy_string: String = String::new();
+    let entropy_string: String;
 
     if user_provided_entropy().is_some() {
         println!("Using user-provided entropy.");
