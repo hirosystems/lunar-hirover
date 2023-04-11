@@ -8,6 +8,7 @@ use libsecp256k1::PublicKey;
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
 use std::env;
+use std::num::ParseIntError;
 
 #[derive(Debug)]
 pub enum Network {
@@ -85,6 +86,13 @@ fn use_default_entropy() -> bool {
     }
 }
 
+fn user_provided_entropy() -> Option<String> {
+    match env::var("ENTROPY") {
+        Ok(val) => Some(val),
+        _ => None,
+    }
+}
+
 pub fn u8_array_to_hex_string(arr: &[u8]) -> String {
     let mut result = String::from("");
     for val in arr.iter() {
@@ -92,6 +100,14 @@ pub fn u8_array_to_hex_string(arr: &[u8]) -> String {
     }
     result
 }
+
+pub fn decode_hex(s: &str) -> Result<Vec<u8>, ParseIntError> {
+    (0..s.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&s[i..i + 2], 16))
+        .collect()
+}
+
 const DEFAULT_ENTROPY: [u8; 32] = [
     85, 231, 105, 57, 174, 52, 198, 135, 143, 199, 229, 232, 188, 59, 96, 8, 208, 153, 37, 246,
     119, 222, 94, 3, 158, 56, 154, 1, 14, 59, 233, 15,
@@ -99,14 +115,23 @@ const DEFAULT_ENTROPY: [u8; 32] = [
 
 pub fn generate_random_mnemonic() -> Mnemonic {
     let mut entropy: [u8; 32] = [0; 32];
+    let mut entropy_string: String = String::new();
 
-    if use_default_entropy() {
+    if user_provided_entropy().is_some() {
+        println!("Using user-provided entropy.");
+        entropy_string = user_provided_entropy().unwrap();
+        let bytes = decode_hex(&entropy_string).unwrap();
+        entropy = bytes[0..32].try_into().unwrap();
+    } else if use_default_entropy() {
+        println!("Using default entropy.");
         entropy = DEFAULT_ENTROPY;
+        entropy_string = u8_array_to_hex_string(&entropy);
     } else {
+        println!("Using random entropy.");
         let mut rng = ChaCha20Rng::from_entropy();
         rng.fill_bytes(&mut entropy);
+        entropy_string = u8_array_to_hex_string(&entropy);
     }
-    let entropy_string = u8_array_to_hex_string(&entropy);
     println!("# Entropy: {}", entropy_string);
 
     let mnemonic = Mnemonic::from_entropy(&entropy, Language::English)
