@@ -116,7 +116,6 @@ pub fn generate_random_mnemonic() -> Mnemonic {
         let phrase: &str = mnemonic.phrase();
         println!("# Mnemonic: {}", phrase);
     }
-    println!("");
     mnemonic
 }
 

@@ -7,7 +7,6 @@ use lunar_hirover::{
 use tiny_keccak::Hasher;
 
 fn main() {
-    println!("");
     let mnemonic = generate_random_mnemonic();
 
     let seed = generate_seed_from_mnemonic(mnemonic);
@@ -20,7 +19,6 @@ fn main() {
                 "# BIP32 Root Key: {}",
                 root_key.to_string(Prefix::XPRV).as_str()
             );
-            println!("");
         }
     }
     // generate and print addresses for BTC/STX
@@ -34,7 +32,6 @@ fn main() {
 
         println!("# STX Address: {}", stx_address.to_string());
         println!("# BTC Address: {}", btc_address);
-        println!("");
     }
     // generate and print addresses for ETH
     {
@@ -51,7 +48,6 @@ fn main() {
 
         println!("# ETH Address: 0x{}", u8_array_to_hex_string(&out[12..]));
         println!("# NOTE: The ETH address can be used to receive funds on the Polygon, Fantom, BNB, Optimism, and Arbitrum chains.");
-        println!("");
     }
 
     // generate and print addresses for DOGE
@@ -63,7 +59,6 @@ fn main() {
         let doge_address = pub_key_to_addr(&public_key.serialize_compressed(), Network::DOGE);
 
         println!("# DOGE Address: {}", doge_address);
-        println!("");
     }
 
     // generate and print addresses for LTC
@@ -75,6 +70,5 @@ fn main() {
         let ltc_address = pub_key_to_addr(&public_key.serialize_compressed(), Network::LTC);
 
         println!("# LTC Address: {}", ltc_address);
-        println!("");
     }
 }
