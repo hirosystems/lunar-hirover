@@ -20,14 +20,12 @@ fn main() {
     let seed = generate_seed_from_mnemonic(mnemonic);
 
     // Print root key to optionally verify some data
-    {
+    if print_private_data() {
         let root_key: XPrv = XPrv::new(&seed).unwrap();
-        if print_private_data() {
-            println!(
-                "# BIP32 Root Key: {}",
-                root_key.to_string(Prefix::XPRV).as_str()
-            );
-        }
+        println!(
+            "# BIP32 Root Key: {}",
+            root_key.to_string(Prefix::XPRV).as_str()
+        );
     }
     // generate and print addresses for BTC/STX
     {
