@@ -1,13 +1,21 @@
+use arboard::Clipboard;
 use bip32::{Prefix, PrivateKey, XPrv};
 use libsecp256k1::{PublicKey, SecretKey};
 use lunar_hirover::{
-    generate_private_key_for_path, generate_random_mnemonic, generate_seed_from_mnemonic,
-    print_private_data, pub_key_to_addr, pub_key_to_stx_address, u8_array_to_hex_string, Network,
+    generate_entropy, generate_private_key_for_path, generate_random_mnemonic,
+    generate_seed_from_mnemonic, print_private_data, pub_key_to_addr, pub_key_to_stx_address,
+    u8_array_to_hex_string, Network,
 };
 use tiny_keccak::Hasher;
 
 fn main() {
-    let mnemonic = generate_random_mnemonic();
+    let (entropy, entropy_string) = generate_entropy();
+
+    let mut clipboard = Clipboard::new().unwrap();
+    Clipboard::set_text(&mut clipboard, entropy_string)
+        .expect("Failed to copy entropy to clipboard.");
+
+    let mnemonic = generate_random_mnemonic(entropy);
 
     let seed = generate_seed_from_mnemonic(mnemonic);
 

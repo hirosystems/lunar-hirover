@@ -113,7 +113,7 @@ const DEFAULT_ENTROPY: [u8; 32] = [
     119, 222, 94, 3, 158, 56, 154, 1, 14, 59, 233, 15,
 ];
 
-pub fn generate_random_mnemonic() -> Mnemonic {
+pub fn generate_entropy() -> ([u8; 32], String) {
     let mut entropy: [u8; 32] = [0; 32];
     let entropy_string: String;
 
@@ -132,8 +132,13 @@ pub fn generate_random_mnemonic() -> Mnemonic {
         rng.fill_bytes(&mut entropy);
         entropy_string = u8_array_to_hex_string(&entropy);
     }
-    println!("# Entropy: {}", entropy_string);
+    if print_private_data() {
+        println!("# Entropy: {}", entropy_string);
+    }
+    (entropy, entropy_string)
+}
 
+pub fn generate_random_mnemonic(entropy: [u8; 32]) -> Mnemonic {
     let mnemonic = Mnemonic::from_entropy(&entropy, Language::English)
         .expect("Failed to generate mnemonic from entropy.");
 
