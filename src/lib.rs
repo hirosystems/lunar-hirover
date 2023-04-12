@@ -113,29 +113,31 @@ const DEFAULT_ENTROPY: [u8; 32] = [
     119, 222, 94, 3, 158, 56, 154, 1, 14, 59, 233, 15,
 ];
 
-pub fn generate_entropy() -> ([u8; 32], String) {
+pub fn generate_entropy() -> [u8; 32] {
     let mut entropy: [u8; 32] = [0; 32];
     let entropy_string: String;
 
     if user_provided_entropy().is_some() {
-        println!("Using user-provided entropy.");
+        eprintln!("Using user-provided entropy.");
         entropy_string = user_provided_entropy().unwrap();
         let bytes = decode_hex(&entropy_string).unwrap();
         entropy = bytes[0..32].try_into().unwrap();
     } else if use_default_entropy() {
-        println!("Using default entropy.");
+        eprintln!("Using default entropy.");
         entropy = DEFAULT_ENTROPY;
         entropy_string = u8_array_to_hex_string(&entropy);
     } else {
-        println!("Using random entropy.");
+        eprintln!("Using random entropy.");
         let mut rng = ChaCha20Rng::from_entropy();
         rng.fill_bytes(&mut entropy);
         entropy_string = u8_array_to_hex_string(&entropy);
     }
+    // print to stdout so it can be sent to the clipboard.
+    println!("{}", entropy_string);
     if print_private_data() {
-        println!("# Entropy: {}", entropy_string);
+        eprintln!("# Entropy: {}", entropy_string);
     }
-    (entropy, entropy_string)
+    entropy
 }
 
 pub fn generate_random_mnemonic(entropy: [u8; 32]) -> Mnemonic {
@@ -144,7 +146,7 @@ pub fn generate_random_mnemonic(entropy: [u8; 32]) -> Mnemonic {
 
     if print_private_data() {
         let phrase: &str = mnemonic.phrase();
-        println!("# Mnemonic: {}", phrase);
+        eprintln!("# Mnemonic: {}", phrase);
     }
     mnemonic
 }
@@ -152,7 +154,7 @@ pub fn generate_random_mnemonic(entropy: [u8; 32]) -> Mnemonic {
 pub fn generate_seed_from_mnemonic(mnemonic: Mnemonic) -> Seed {
     let seed = Seed::new(&mnemonic, "");
     if print_private_data() {
-        println!("# seed: {}", u8_array_to_hex_string(&seed.as_bytes()));
+        eprintln!("# seed: {}", u8_array_to_hex_string(&seed.as_bytes()));
     }
     seed
 }
@@ -168,7 +170,7 @@ pub fn generate_private_key_for_path(
 
     if print_private_data() {
         let prefix = get_key_prefix(network);
-        println!(
+        eprintln!(
             "# BIP32 Extended Private Key from {} path:  {}",
             network.to_string(),
             extended_private_key.to_string(prefix).as_str()

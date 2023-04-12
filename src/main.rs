@@ -1,4 +1,3 @@
-use arboard::Clipboard;
 use bip32::{Prefix, PrivateKey, XPrv};
 use libsecp256k1::{PublicKey, SecretKey};
 use lunar_hirover::{
@@ -9,11 +8,7 @@ use lunar_hirover::{
 use tiny_keccak::Hasher;
 
 fn main() {
-    let (entropy, entropy_string) = generate_entropy();
-
-    let mut clipboard = Clipboard::new().unwrap();
-    Clipboard::set_text(&mut clipboard, entropy_string)
-        .expect("Failed to copy entropy to clipboard.");
+    let entropy = generate_entropy();
 
     let mnemonic = generate_random_mnemonic(entropy);
 
@@ -22,7 +17,7 @@ fn main() {
     // Print root key to optionally verify some data
     if print_private_data() {
         let root_key: XPrv = XPrv::new(&seed).unwrap();
-        println!(
+        eprintln!(
             "# BIP32 Root Key: {}",
             root_key.to_string(Prefix::XPRV).as_str()
         );
@@ -36,8 +31,8 @@ fn main() {
         let btc_address = pub_key_to_addr(&public_key.serialize_compressed(), Network::BTC);
         let stx_address = pub_key_to_stx_address(public_key);
 
-        println!("# STX Address: {}", stx_address.to_string());
-        println!("# BTC Address: {}", btc_address);
+        eprintln!("# STX Address: {}", stx_address.to_string());
+        eprintln!("# BTC Address: {}", btc_address);
     }
     // generate and print addresses for ETH
     {
@@ -52,8 +47,8 @@ fn main() {
         let mut out = [0u8; 32];
         keccak.finalize(&mut out);
 
-        println!("# ETH Address: 0x{}", u8_array_to_hex_string(&out[12..]));
-        println!("# NOTE: The ETH address can be used to receive funds on the Polygon, Fantom, BNB, Optimism, and Arbitrum chains.");
+        eprintln!("# ETH Address: 0x{}", u8_array_to_hex_string(&out[12..]));
+        eprintln!("# NOTE: The ETH address can be used to receive funds on the Polygon, Fantom, BNB, Optimism, and Arbitrum chains.");
     }
 
     // generate and print addresses for DOGE
@@ -64,7 +59,7 @@ fn main() {
 
         let doge_address = pub_key_to_addr(&public_key.serialize_compressed(), Network::DOGE);
 
-        println!("# DOGE Address: {}", doge_address);
+        eprintln!("# DOGE Address: {}", doge_address);
     }
 
     // generate and print addresses for LTC
@@ -75,6 +70,6 @@ fn main() {
 
         let ltc_address = pub_key_to_addr(&public_key.serialize_compressed(), Network::LTC);
 
-        println!("# LTC Address: {}", ltc_address);
+        eprintln!("# LTC Address: {}", ltc_address);
     }
 }
