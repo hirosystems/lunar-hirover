@@ -1,13 +1,13 @@
-name: Release
+name: Upload Build
 
 
 on:
   push:
-    branch: test-ci
+    branch: main
 
 jobs:
   release:
-    name: release ${{ matrix.target }}
+    name: upload build for ${{ matrix.target }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
