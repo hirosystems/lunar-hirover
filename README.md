@@ -32,3 +32,4 @@ The tool will calculate and display public addresses for the following chains:
     - Optimism
     - Polygon
  - LITECOIN
+ - STX
