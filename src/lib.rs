@@ -16,6 +16,7 @@ pub enum Network {
     DOGE,
     ETH,
     LTC,
+    STX,
 }
 impl std::fmt::Display for Network {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -24,20 +25,15 @@ impl std::fmt::Display for Network {
 }
 
 pub fn get_derivation_path(network: &Network) -> DerivationPath {
-    match network {
-        Network::BTC => "m/44'/0'/0'/0"
-            .parse::<DerivationPath>()
-            .expect("unable to parse derivation path for BTC"),
-        Network::DOGE => "m/44'/3'/0'/0"
-            .parse()
-            .expect("unable to parse derivation path for DOGE"),
-        Network::ETH => "m/44'/60'/0'/0"
-            .parse()
-            .expect("unable to parse derivation path for ETH"),
-        Network::LTC => "m/44'/2'/0'/0"
-            .parse()
-            .expect("unable to parse derivation path for ETH"),
-    }
+    let path = match network {
+        Network::BTC => "m/44'/0'/0'/0",
+        Network::DOGE => "m/44'/3'/0'/0",
+        Network::ETH => "m/44'/60'/0'/0",
+        Network::LTC => "m/44'/2'/0'/0",
+        Network::STX => "m/44'/5757'/0'/0",
+    };
+    path.parse::<DerivationPath>()
+        .unwrap_or_else(|e| panic!("unable to parse derivation path for {}: {}", network, e))
 }
 
 const DGPV: Prefix = Prefix::from_parts_unchecked("dgpv", 0x02FAC398);
