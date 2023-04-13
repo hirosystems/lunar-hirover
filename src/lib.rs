@@ -1,10 +1,6 @@
 use bip32::{ChildNumber, DerivationPath, ExtendedPrivateKey, Prefix, XPrv};
 use bip39::{Language, Mnemonic, Seed};
 use bitcoin_hashes::{hash160, Hash};
-use clarity_repl::clarity::address::{AddressHashMode, C32_ADDRESS_VERSION_MAINNET_SINGLESIG};
-use clarity_repl::clarity::stacks_common::types::chainstate::StacksAddress;
-use clarity_repl::clarity::util::secp256k1::Secp256k1PublicKey;
-use libsecp256k1::PublicKey;
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
 use std::env;
@@ -44,25 +40,13 @@ pub fn get_key_prefix(network: &Network) -> Prefix {
     }
 }
 
-pub fn get_p2pkh_prefix(network: Network) -> Option<u8> {
+pub fn get_p2pkh_prefix(network: &Network) -> Option<u8> {
     match network {
         Network::BTC => Some(0),
         Network::DOGE => Some(30),
         Network::LTC => Some(48),
         _ => None,
     }
-}
-
-pub fn pub_key_to_stx_address(public_key: PublicKey) -> StacksAddress {
-    let public_key = Secp256k1PublicKey::from_slice(&public_key.serialize_compressed()).unwrap();
-
-    StacksAddress::from_public_keys(
-        C32_ADDRESS_VERSION_MAINNET_SINGLESIG,
-        &AddressHashMode::SerializeP2PKH,
-        1,
-        &vec![public_key],
-    )
-    .unwrap()
 }
 
 /// Checks if the `PRINT_PRIVATE_DATA` environment variable is set to
@@ -177,7 +161,7 @@ pub fn generate_private_key_for_path(
     extended_private_key.derive_child(child_number).unwrap()
 }
 
-pub fn pub_key_to_addr(pubkey: &[u8], network: Network) -> String {
+pub fn pub_key_to_addr(pubkey: &[u8], network: &Network) -> String {
     let mut pubkey_hash = Vec::from(hash160::Hash::hash(&pubkey).to_byte_array());
     let mut address_bytes = Vec::new();
     let prefix: u8 = get_p2pkh_prefix(network).expect("Invalid network for p2pkh.");
