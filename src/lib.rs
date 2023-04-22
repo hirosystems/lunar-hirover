@@ -13,6 +13,7 @@ pub enum Network {
     ETH,
     LTC,
     STX,
+    XMR,
 }
 impl std::fmt::Display for Network {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -27,6 +28,7 @@ pub fn get_derivation_path(network: &Network) -> DerivationPath {
         Network::ETH => "m/44'/60'/0'/0",
         Network::LTC => "m/44'/2'/0'/0",
         Network::STX => "m/44'/5757'/0'/0",
+        Network::XMR => "m/44'/128'/0'/0",
     };
     path.parse::<DerivationPath>()
         .unwrap_or_else(|e| panic!("unable to parse derivation path for {}: {}", network, e))
