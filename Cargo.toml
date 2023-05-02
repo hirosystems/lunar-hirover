@@ -16,3 +16,4 @@ base-encode = "0.3.1"
 tiny-keccak = { version = "2.0.0", features = ["keccak"] }
 bip32 = {version="0.5.0" }
 bitcoin_hashes = "0.12.0"
+monero = { version = "0.18.2", default-features = false }
