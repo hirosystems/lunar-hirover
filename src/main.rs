@@ -62,10 +62,10 @@ fn main() {
 
         let mut sha3 = tiny_keccak::Keccak::v256();
         tiny_keccak::Hasher::update(&mut sha3, &private_key.private_key().to_bytes());
-    
+
         let mut hash = [0u8; 32];
         tiny_keccak::Hasher::finalize(sha3, &mut hash);
-    
+
         // key needs to be less than "curve order", reduce the SHA3 result to get a valid ed25519 scalar
         use monero::cryptonote::hash::Hash as MoneroHash;
         let private_spend_key = MoneroHash::as_scalar(&MoneroHash::from_slice(&hash));
@@ -75,8 +75,14 @@ fn main() {
             view: private_view_key,
             spend: private_spend_key,
         };
-    
-        let address = monero::util::address::Address::from_keypair(monero::Network::Mainnet, &key_pair);
+
+        let address =
+            monero::util::address::Address::from_keypair(monero::Network::Mainnet, &key_pair);
+
+        if print_private_data() {
+            eprintln!("# XMR Private View Key: {}", private_view_key);
+            eprintln!("# XMR Private Spend Key: {}", private_spend_key);
+        }
 
         eprintln!("# XMR Address: {}", address);
     }
