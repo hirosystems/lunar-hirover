@@ -113,11 +113,16 @@ pub fn generate_entropy() -> [u8; 32] {
         let mut rng = ChaCha20Rng::from_entropy();
         rng.fill_bytes(&mut entropy);
         entropy_string = u8_array_to_hex_string(&entropy);
+        eprintln!(
+            "# Partial Entropy: {}...{}",
+            &entropy_string[..3],
+            &entropy_string[61..]
+        );
     }
     // print to stdout so it can be sent to the clipboard.
     println!("{}", entropy_string);
     if print_private_data() {
-        eprintln!("# Entropy: {}", entropy_string);
+        eprintln!("# Full Entropy: {}", entropy_string);
     }
     entropy
 }
