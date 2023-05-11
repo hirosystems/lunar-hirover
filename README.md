@@ -27,13 +27,14 @@ in the terminal. Something like the following will be displayed:
 ```sh
 Using random entropy.
 00a92…8328
-# STX Address: SP2Y...8Y07
+# STX Address: SP2Y…8Y07
 # BTC Address: 1JJV…WN1A
 # ETH Address: 0x9fe7…f1f32
 # NOTE: The ETH address can be used to receive funds on the Polygon, Fantom, BNB, Optimism, and Arbitrum chains.
 # DOGE Address: DJpj…JGWeH
 # LTC Address: LLXk…ZNc8
 # XMR Address: 48U5…XMwF
+# TEZ Address: tz1W…ByRD
 ```
 The first value represents the entropy value that is used to generate the mnemonic. The rest of the values are the public addresses generated from that mnemonic on each chain.
 
@@ -90,4 +91,5 @@ The tool will calculate and display public addresses for the following chains:
     - Polygon
  - LTC
  - STX
+ - TEZ
  - XMR
