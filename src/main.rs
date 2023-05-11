@@ -6,7 +6,8 @@ use libsecp256k1::{PublicKey, SecretKey};
 use lunar_hirover::{
     generate_entropy, generate_private_key_for_path, generate_random_mnemonic,
     generate_seed_from_mnemonic, print_private_data, pub_key_to_addr, u8_array_to_hex_string,
-    Network,
+    generate_ed25519_private_key_for_path, base58check_encode, tez_pub_key_to_addr,
+    Network, TezPrefix,
 };
 use tiny_keccak::Hasher;
 
@@ -102,5 +103,20 @@ fn main() {
 
         eprintln!("# ETH Address: 0x{}", u8_array_to_hex_string(&out[12..]));
         eprintln!("# NOTE: The ETH address can be used to receive funds on the Polygon, Fantom, BNB, Optimism, and Arbitrum chains.");
+    }
+
+    // generate and print addresses for TEZ
+    {
+        let private_key = generate_ed25519_private_key_for_path(&Network::TEZ, &seed);
+        let public_key = private_key.public_key();
+
+        if print_private_data() {
+            let edsk = base58check_encode(&private_key.secret_key.to_bytes(), &TezPrefix::EDSK);
+            eprintln!("# TEZ Secret Key: {}", edsk);
+        }
+
+        let public_key_hash = tez_pub_key_to_addr(&public_key.to_bytes(), &TezPrefix::TZ1);
+
+        eprintln!("# TEZ Address: {}", public_key_hash);
     }
 }

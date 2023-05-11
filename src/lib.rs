@@ -1,10 +1,18 @@
 use bip32::{ChildNumber, DerivationPath, ExtendedPrivateKey, Prefix, XPrv};
 use bip39::{Language, Mnemonic, Seed};
+use ed25519_dalek_bip32::{
+  ExtendedSecretKey as Ed25519ExtendedSecretKey,
+  DerivationPath as Ed25519DerivationPath
+};
 use bitcoin_hashes::{hash160, Hash};
 use rand::prelude::*;
 use rand_chacha::ChaCha20Rng;
 use std::env;
 use std::num::ParseIntError;
+use blake2::Blake2bVar;
+use blake2::digest::{Update, VariableOutput};
+use sha2::{Sha256, Digest};
+use base58::ToBase58;
 
 #[derive(Debug)]
 pub enum Network {
@@ -13,25 +21,50 @@ pub enum Network {
     ETH,
     LTC,
     STX,
+    TEZ,
     XMR,
 }
+
+pub enum TezPrefix {
+    TZ1,
+    EDSK,
+}
+
 impl std::fmt::Display for Network {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         write!(f, "{:?}", self)
     }
 }
 
-pub fn get_derivation_path(network: &Network) -> DerivationPath {
-    let path = match network {
+pub fn get_derivation_path_str(network: &Network) -> &str {
+    match network {
         Network::BTC => "m/44'/0'/0'/0",
         Network::DOGE => "m/44'/3'/0'/0",
         Network::ETH => "m/44'/60'/0'/0",
         Network::LTC => "m/44'/2'/0'/0",
         Network::STX => "m/44'/5757'/0'/0",
+        Network::TEZ => "m/44'/1729'/0'/0'",
         Network::XMR => "m/44'/128'/0'/0",
-    };
+    }
+}
+
+pub fn get_derivation_path(network: &Network) -> DerivationPath {
+    let path = get_derivation_path_str(&network);
     path.parse::<DerivationPath>()
         .unwrap_or_else(|e| panic!("unable to parse derivation path for {}: {}", network, e))
+}
+
+pub fn get_ed25519_derivation_path(network: &Network) -> Ed25519DerivationPath {
+    let path = get_derivation_path_str(&network);
+    path.parse::<Ed25519DerivationPath>()
+        .unwrap_or_else(|e| panic!("unable to parse derivation path for {}: {}", network, e))
+}
+
+pub fn get_tez_prefix(prefix: &TezPrefix) -> &'static [u8] {
+    match prefix {
+        TezPrefix::TZ1 => &[6, 161, 159],
+        TezPrefix::EDSK => &[13, 15, 58, 7],
+    }
 }
 
 const DGPV: Prefix = Prefix::from_parts_unchecked("dgpv", 0x02FAC398);
@@ -168,6 +201,16 @@ pub fn generate_private_key_for_path(
     extended_private_key.derive_child(child_number).unwrap()
 }
 
+pub fn generate_ed25519_private_key_for_path(
+    network: &Network,
+    seed: &Seed,
+) -> Ed25519ExtendedSecretKey {
+    let path = get_ed25519_derivation_path(network);
+    let extended_private_key =
+        Ed25519ExtendedSecretKey::from_seed(&seed.as_bytes()).expect("Failed to generate Ed25519 extended private key.");
+    extended_private_key.derive(&path).expect("Failed to generate Ed25519 extended private key.")
+}
+
 pub fn pub_key_to_addr(pubkey: &[u8], network: &Network) -> String {
     let mut pubkey_hash = Vec::from(hash160::Hash::hash(&pubkey).to_byte_array());
     let mut address_bytes = Vec::new();
@@ -175,4 +218,27 @@ pub fn pub_key_to_addr(pubkey: &[u8], network: &Network) -> String {
     address_bytes.push(prefix);
     address_bytes.append(&mut pubkey_hash);
     bitcoin::util::base58::check_encode_slice(&address_bytes)
+}
+
+pub fn base58check_encode(data: &[u8], prefix: &TezPrefix) -> String {
+    let prefix_bytes = get_tez_prefix(prefix);
+    let mut prefixed_data = Vec::with_capacity(prefix_bytes.len() + data.len());
+    prefixed_data.extend(prefix_bytes);
+    prefixed_data.extend(data);
+
+    // 4 bytes checksum
+    let mut payload = Vec::with_capacity(prefixed_data.len() + 4);
+    payload.extend(&prefixed_data);
+    let checksum = Sha256::digest(&Sha256::digest(&prefixed_data));
+    payload.extend(&checksum[..4]);
+
+    payload.to_base58()
+}
+
+pub fn tez_pub_key_to_addr(pubkey: &[u8], prefix: &TezPrefix) -> String {
+    let mut hasher = Blake2bVar::new(20).unwrap();
+    hasher.update(&pubkey);
+    let mut buf = [0u8; 20];
+    hasher.finalize_variable(&mut buf).expect("Failed to hash TEZ public key.");
+    base58check_encode(&buf, &prefix)
 }
