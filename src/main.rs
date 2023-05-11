@@ -111,7 +111,8 @@ fn main() {
         let public_key = private_key.public_key();
 
         if print_private_data() {
-            let edsk = base58check_encode(&private_key.secret_key.to_bytes(), &TezPrefix::EDSK);
+            let secret_key = [&private_key.secret_key.to_bytes()[..], &public_key.to_bytes()[..]].concat();
+            let edsk = base58check_encode(&secret_key, &TezPrefix::EDSK);
             eprintln!("# TEZ Secret Key: {}", edsk);
         }
 

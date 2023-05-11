@@ -63,7 +63,7 @@ pub fn get_ed25519_derivation_path(network: &Network) -> Ed25519DerivationPath {
 pub fn get_tez_prefix(prefix: &TezPrefix) -> &'static [u8] {
     match prefix {
         TezPrefix::TZ1 => &[6, 161, 159],
-        TezPrefix::EDSK => &[13, 15, 58, 7],
+        TezPrefix::EDSK => &[43, 246, 78, 7],
     }
 }
 
@@ -236,7 +236,7 @@ pub fn base58check_encode(data: &[u8], prefix: &TezPrefix) -> String {
 }
 
 pub fn tez_pub_key_to_addr(pubkey: &[u8], prefix: &TezPrefix) -> String {
-    let mut hasher = Blake2bVar::new(20).unwrap();
+    let mut hasher = Blake2bVar::new(20).expect("Failed to create new Blake2b.");
     hasher.update(&pubkey);
     let mut buf = [0u8; 20];
     hasher.finalize_variable(&mut buf).expect("Failed to hash TEZ public key.");
